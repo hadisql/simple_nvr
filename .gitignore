@@ -3,3 +3,5 @@ recordings/
 requirements.txt
 tailwindcss
 output.css
+.env
+record.sh
