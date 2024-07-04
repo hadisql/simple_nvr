@@ -1,6 +1,8 @@
 services:
   rtsp-recorder:
     build: .
+    ports:
+      - "8217:8217"
     volumes:
       - ./recordings:/recordings
       - /etc/localtime:/etc/localtime:ro
