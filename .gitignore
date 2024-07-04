@@ -1,1 +1,5 @@
 recordings/
+.venv
+requirements.txt
+tailwindcss
+output.css
