@@ -1,0 +1,15 @@
+services:
+  rtsp-recorder:
+    build: .
+    volumes:
+      - ./recordings:/recordings
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - RTSP_URL=${RTSP_URL}
+      - DEST_FOLDER=/recordings
+      - VIDEO_FORMAT=${VIDEO_FORMAT}
+      - SEGMENT_TIME=${SEGMENT_TIME}
+      - TZ=${TZ}
+    env_file:
+      - .env
