@@ -1,7 +1,7 @@
+.DS_Store
 recordings/
 .venv
-requirements.txt
-tailwindcss
-output.css
 .env
-record.sh
+tailwind*
+input.css
+tailwind.config.js

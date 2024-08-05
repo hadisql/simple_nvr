@@ -1,0 +1,7 @@
+Flask==3.0.3
+Flask-SocketIO==5.3.6
+gunicorn==20.1.0
+celery==5.4.0
+redis==5.0.7
+python-dotenv==1.0.1
+psutil==6.0.0
