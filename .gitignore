@@ -1,5 +1,6 @@
+.DS_Store
 recordings/
 .venv
 .env
-tailwindcss
-output.css
+tailwind*
+input.css

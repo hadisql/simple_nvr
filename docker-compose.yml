@@ -9,5 +9,5 @@ services:
       - /etc/timezone:/etc/timezone:ro
     environment:
       - RUNNING_IN_DOCKER=True
-    env_file:
-      - .env
+      - DEBUG=False
+      - PYTHONUNBUFFERED=1

@@ -5,40 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RTSP Recorder</title>
     <link href="../static/output.css" rel="stylesheet">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Range slider output value
+            const removeOutput = document.querySelector('#remove_recordings_output');
+            const removeInput = document.querySelector('#remove_recordings');
+            
+            function updateOutput() {
+                const value = parseInt(removeInput.value, 10);
+                const suffix = value === 1 ? 'day' : 'days';
+                removeOutput.textContent = `${value} ${suffix}`;
+            }
+            // Call the function initially
+            updateOutput();
+            
+            // Call the function whenever the value changes
+            removeInput.addEventListener('input', updateOutput);
+        });
+
+    </script>
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">RTSP Recorder</h1>
-        <form action="/start" method="post" class="mb-2">
+    <div class="container mx-auto px-8 py-8">
+        <h1 class="text-2xl font-bold mb-4">RTSP Recorder{% if process_running and debug %}, ps running{% endif %} </h1>
+        {% if process_running %}
+        <div class="my-6 bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md" role="alert">
+            <div class="flex">
+                <div class="py-1"><svg class="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
+                <div>
+                <p class="font-bold">Process is running</p>
+                <p class="text-sm">The video segments are being processed</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <form id="startForm" action="/start" method="post" class="mb-2">
+            {% if already_running %}    
+            <div class="my-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Holy smokes!</strong>
+                <span class="block sm:inline">Process is already running</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                </span>
+            </div>
+            {% endif %}
             <div class="mb-4">
                 <label for="rtsp_url" class="block text-gray-700 text-sm font-bold mb-2">RTSP URL:</label>
-                <input placeholder="rtsp://<username>:<password>@<camera-ip>:<port>/<optional>" type="text" id="rtsp_url" name="rtsp_url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <input placeholder="rtsp://<username>:<password>@<camera-ip>:<port>/<optional>" type="text" id="rtsp_url" name="rtsp_url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
             </div>
             <div class="mb-4">
                 <label for="segment_time" class="block text-gray-700 text-sm font-bold mb-2">Segment Time (seconds):</label>
-                <input value=900 type="number" id="segment_time" name="segment_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <input value=900 type="number" id="segment_time" name="segment_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
             </div>
             <div class="mb-4">
                 <label for="subfolder" class="block text-gray-700 text-sm font-bold mb-2">Subfolder (optional):</label>
-                <input placeholder="subfolder" type="text" id="subfolder" name="subfolder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <input placeholder="subfolder" type="text" id="subfolder" name="subfolder" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
             <div class="mb-4">
                 <label for="video_format" class="block text-gray-700 text-sm font-bold mb-2">Video Format:</label>
-                <select name="video_format" id="video_format" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <select name="video_format" id="video_format" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
                     Video Format:
                     <option value="avi">avi</option>
                     <option value="mp4" selected>mp4</option>
                 </select>
             </div>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <div class="mb-4">
+                <label class="relative flex items-center p-2 text-gray-700 text-sm font-bold ">
+                    Audio : &nbsp; 🔇
+                    <input id="audio" type="checkbox" class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md"/>
+                    <span class="w-12 h-6 flex items-center flex-shrink-0 m-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-blue-500 after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6"></span>
+                      🔊
+                </label>
+            </div>
+            <p class="block text-gray-700 text-md font-bold mb-4">Remove old recordings after:</p>
+            <div class="block sm:grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8 items-center justify-items-center border rounded-lg p-4">
+                <label for="remove_recordings" class="block text-gray-700 text-sm font-bold mb-2">Days</label>
+                <input type="number" name="remove_recordings" id="remove_recordings" value="3" min="0" max="30" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <label for="hours_input" class="block text-gray-700 text-sm font-bold my-2">Hours</label>
+                <input type="number" name="hours_input" id="hours_input" value="0" min="0" max="24" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+        </form>
+        <form id="stopForm" action="/stop" method="post">
+        </form>
+        <div class="flex justify-center gap-6 mt-10 sm:mt-14 md:mt-20 mb-6">
+            <button form="startForm" id="startButton" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded {% if process_running %}opacity-20 cursor-not-allowed{% endif %}" {% if process_running %}disabled{% endif %}>
                 Start Recording
             </button>
-        </form>
-        <form action="/stop" method="post">
-            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+            <button form="stopForm" id="stopButton" type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded {% if not process_running %}opacity-20 cursor-not-allowed{% endif %}" {% if not process_running %}disabled{% endif %}>
                 Stop Recording
             </button>
-        </form>
+        </div>
     </div>
+
+
 </body>
 </html>
