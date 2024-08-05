@@ -4,3 +4,4 @@ recordings/
 .env
 tailwind*
 input.css
+tailwind.config.js
